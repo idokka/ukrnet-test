@@ -1,0 +1,6 @@
+[submodule "thirdparty/tclap"]
+	path = thirdparty/tclap
+	url = git@github.com:idokka/tclap.git
+[submodule "thirdparty/tup"]
+	path = thirdparty/tup
+	url = https://github.com/gittup/tup.git 
