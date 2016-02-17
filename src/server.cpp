@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include "server/server.hpp"
-#include "common/logger.hpp"
+#include "include/server.hpp"
+#include "include/logger.hpp"
 #include "tclap/CmdLine.h"
 
 using namespace std;
@@ -39,9 +39,10 @@ int main(int argc, char const *argv[])
 	}
 
 	// init logger
-	logger().log_path(log_path);
+	logger().set_log_path(log_path);
 	logger().init();
 
 	// start server
-	Server server(port);
+	server::Server server(port);
+	server.open();
 }
