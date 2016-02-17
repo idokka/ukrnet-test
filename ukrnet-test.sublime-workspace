@@ -3,10 +3,81 @@
 	{
 		"selected_items":
 		[
+			[
+				"set_",
+				"set_write_to_console"
+			],
+			[
+				"_wr",
+				"_write_to_file"
+			],
+			[
+				"wri",
+				"_write_to_file"
+			],
+			[
+				"_",
+				"_write_to_console"
+			],
+			[
+				"_l",
+				"_write_to_console"
+			],
+			[
+				"inc",
+				"include"
+			],
+			[
+				"_lo",
+				"_log_file"
+			],
+			[
+				"log",
+				"log_path"
+			],
+			[
+				"in",
+				"include"
+			],
+			[
+				"defa",
+				"default_log_path"
+			],
+			[
+				"port",
+				"portArg"
+			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "src/main.cpp",
+			"settings":
+			{
+				"buffer_size": 1152,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "#include <unistd.h>\n#include <sys/types.h> \n#include <sys/socket.h>\n#include <netinet/in.h>\n#include \"../common/logger.hpp\"\n\nnamespace ukrnet\n{\n	namespace server\n	{\n		class Server\n		{\n		public:\n			server(int port)\n				: _port(port)\n			{\n\n			}\n			\n			~server()\n			{\n\n			}\n\n			bool open()\n			{\n				_sock_file_d = socket(AF_INET, SOCK_STREAM, 0);\n				if (_sock_file_d < 0)\n				{\n					logger().err(\"server\", \"cannot open descriptor\");\n					return false;\n				}\n				\n			}\n		private:\n			int _port;\n			int _sock_file_d;\n\n		};\n	}\n}",
+			"file": "src/server/server.hpp",
+			"file_size": 517,
+			"file_write_time": 131001305726098274,
+			"settings":
+			{
+				"buffer_size": 522,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/server/server.c",
+			"settings":
+			{
+				"buffer_size": 1583,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -15,10 +86,22 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 390.0,
-		"last_filter": "Package Control: ",
+		"height": 54.0,
+		"last_filter": "Preferences: SyntaxFold Settings - User",
 		"selected_items":
 		[
+			[
+				"Preferences: SyntaxFold Settings - User",
+				"Preferences: SyntaxFold Settings - User"
+			],
+			[
+				"Preferences: SyntaxFold Keybindings - Default",
+				"Preferences: SyntaxFold Keybindings - Default"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
 			[
 				"Package Control: ",
 				"Package Control: Install Package"
@@ -43,17 +126,70 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/home/dokka/src/ukrnet-test/src",
+		"/home/dokka/src/ukrnet-test/src/common",
+		"/home/dokka/src/ukrnet-test/src/server",
+		"/home/dokka/src/ukrnet-test/thirdparty"
+	],
 	"file_history":
 	[
+		"/home/dokka/src/ukrnet-test/src/common/logger.hpp",
+		"/home/dokka/.config/sublime-text-3/Packages/User/syntax_fold.sublime-settings",
+		"/home/dokka/.config/sublime-text-3/Packages/SyntaxFold/Default (Linux).sublime-keymap",
+		"/home/dokka/.config/sublime-text-3/Packages/sublimetext-syntaxfold/syntax_fold.sublime-settings",
+		"/home/dokka/.config/sublime-text-3/Packages/sublimetext-syntaxfold/Default (Linux).sublime-keymap",
+		"/home/dokka/src/ukrnet-test/src/common/stream-helper.hpp",
+		"/home/dokka/src/ukrnet-test/src/readme.md",
+		"/home/dokka/src/notify.c",
+		"/home/dokka/src/cookie/advbdaq/Makefile",
+		"/home/dokka/src/cookie/advbdaq/advbdaq.mk",
+		"/home/dokka/src/ukrnet-test/src/server/server.hpp",
+		"/home/dokka/src/ukrnet-test/src/main.cpp",
+		"/home/dokka/src/ukrnet-test/src/server/server.h",
+		"/home/dokka/src/ukrnet-test/src/common/logger.h",
+		"/home/dokka/src/Symbol List - Prefix Banner Items.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C.tmLanguage",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C++.tmLanguage",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C.tmLanguage.header",
+		"/home/dokka/src/Symbol List - Indent Class Methods.tmPreferences",
+		"/home/dokka/src/Symbol List Hide Forward Decls.tmPreferences",
+		"/home/dokka/src/Symbol Index Hide Ctors.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Completion Rules.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Symbol List - Prefix Banner Items.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Comments (C++).tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C++ - Starting Kit.sublime-build",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/namespace-..-(namespace).sublime-snippet",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/messages.json",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C++.sublime-settings",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Symbol Index.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Indentation Rules.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/README.md",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/messages/0.2.6.txt",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/messages/0.2.7.txt",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/messages/0.2.8.txt",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/messages/install.txt",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/Symbol List - Indent Class Methods.tmPreferences",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/class-..-(class).sublime-snippet",
+		"/home/dokka/.config/sublime-text-3/Packages/cppStartingKit/C.sublime-settings",
+		"/home/dokka/.config/sublime-text-3/Packages/Colorcoder/colorcoder.sublime-settings",
+		"/home/dokka/.config/sublime-text-3/Packages/User/colorcoder.sublime-settings",
+		"/home/dokka/src/ukrnet-test/thirdparty/tclap/include/tclap/ValueArg.h",
+		"/home/dokka/src/ukrnet-test/thirdparty/tclap/examples/test1.cpp",
+		"/home/dokka/src/ukrnet-test/thirdparty/tclap/include/tclap/CmdLine.h",
+		"/tmp/mozilla_dokka0/server-1.c",
+		"/home/dokka/src/ukrnet-test/thirdparty/tclap/include/Makefile.in",
+		"/home/dokka/src/ukrnet-test/main.cpp",
 		"/home/dokka/src/atto-test/main.cpp"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 25.0
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 93.0,
 		"where_history":
 		[
 		]
@@ -63,6 +199,17 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"class-struct",
+			"class-struct-block",
+			"block.class-struct",
+			"Semicolon",
+			"semicolon",
+			"semi_colon.eol.ccpp",
+			";",
+			";\\$",
+			";$",
+			"semi_colon",
+			"Semicolon"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -80,18 +227,116 @@
 	"groups":
 	[
 		{
+			"selected": 1,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "src/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1152,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1129,
+								1129
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "1d8af75f",
+							"spell_check": false,
+							"syntax": "Packages/cppStartingKit/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 357.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/server/server.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 522,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								460,
+								460
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "d9a582a1",
+							"spell_check": false,
+							"syntax": "Packages/cppStartingKit/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": -0.0,
+						"translation.y": 102.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/server/server.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1583,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								632,
+								632
+							]
+						],
+						"settings":
+						{
+							"bs_sintax": "c++",
+							"buffer_scroll_name": "b1fad33b",
+							"spell_check": false,
+							"syntax": "Packages/cppStartingKit/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 153.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
 			]
 		}
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 25.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 33.0
 	},
 	"layout":
 	{
@@ -124,7 +369,7 @@
 	"project": "ukrnet-test.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 46.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -138,12 +383,12 @@
 	},
 	"select_project":
 	{
-		"height": 0.0,
+		"height": 500.0,
 		"last_filter": "",
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 380.0
 	},
 	"select_symbol":
 	{
