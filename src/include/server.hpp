@@ -20,12 +20,11 @@ namespace ukrnet
 		typedef std::function<void(Client &)> funcClient;
 	public:
 		// default constructor
-		// port: server port for listen
-		// client_func: custom client functor
-		Server(int port, funcClient client_func)
-			: _port(port)
+		Server()
+			: _port(0)
 			, _is_opened(false)
 		{
+			// none of init
 		}
 		
 		// default destructor; closes socket if needed
@@ -41,6 +40,12 @@ namespace ukrnet
 			// check if socket already is opened
 			if (_is_opened)
 				return true;
+			// check is socket port is setted
+			if (_port == 0)
+			{
+				logger().err("server", "port not specified");
+				return false;
+			}
 
 			// try create socket
 			_sock.desc = socket(AF_INET, SOCK_STREAM, 0);
@@ -101,6 +106,11 @@ namespace ukrnet
 		// main accpet loop; creates thread on every incloming connection, call client functor
 		bool Accept()
 		{
+			if (_is_opened == false)
+			{
+				logger().err("server", "socket not opened");
+				return false;
+			}
 			while (true)
 			{
 				Sock client;
@@ -119,10 +129,18 @@ namespace ukrnet
 		}
 
 	public:
+		// get socket port
+		int port() const { return _port; }
+		// set socket port, returns operation result
+		bool set_port(int value) { if (_is_opened) return false; else return (_port = value); }
 		// get is server opened
 		bool is_opened() const { return _is_opened; }
 		// set is server opened, returns operation result
 		bool set_is_opened(bool value) { return value ? Open() : Close(); }
+		// get client socket function
+		const funcClient &client_func() const { return _client_func; }
+		// set client socket function
+		void set_client_func(funcClient value) { _client_func = value; }
 
 	private:
 		// listen port

@@ -1,6 +1,6 @@
 #include <iostream>
-#include "include/server.hpp"
 #include "include/logger.hpp"
+#include "memcached.hpp"
 #include "tclap/CmdLine.h"
 
 using namespace std;
@@ -41,16 +41,7 @@ int main(int argc, char const *argv[])
 	logger().set_log_path(log_path);
 	logger().init();
 
-	// start server
-	Server server(port, [](Client &){});
-	server.Open();
-	if (server.is_opened() == false)
-	{
-		logger().err("main", "failed to open server");
-		return 1;
-	}
-
-	// start server listen
-	server.Accept();
+	MemCached memcached(port);
+	memcached.Run();
 	return 0;
 }

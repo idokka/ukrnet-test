@@ -11,6 +11,7 @@
 
 namespace ukrnet
 {
+	// socket client stream
 	class Client
 	{
 	public:
