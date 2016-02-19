@@ -12,6 +12,7 @@
 
 namespace ukrnet
 {
+	// socket server
 	class Server
 	{
 	public:
@@ -104,7 +105,7 @@ namespace ukrnet
 			{
 				Sock client;
 				client.desc = accept(_sock.desc, (struct sockaddr *) &client.addr, &client.addr_len);
-
+				// start new thread to work with client socket stream
 				auto do_client_execute = std::bind(& Server::DoClientExecute, this, std::placeholders::_1);
 				std::thread(do_client_execute, client);
 			}

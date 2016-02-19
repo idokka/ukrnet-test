@@ -108,7 +108,12 @@ namespace ukrnet
 					// do read data from socket
 					readed = read(_sock.desc, _buffer.data(), _buffer.size());
 					// break reading if needed
-					if (readed <= 0)
+					if (readed < 0)
+					{
+						logger().err("client", "cannot write data", errno);
+						break;
+					}
+					if (readed == 0)
 						break;
 					// reset iterators
 					_pos_begin = _buffer.begin();
@@ -133,15 +138,42 @@ namespace ukrnet
 			return result;
 		}
 
+		// write string to client socket
 		bool Write(std::string str)
-		{
+		{	
+			int error = write(_sock.desc, str.data(), str.size());
+			if (error < 0)
+			{
+				logger().err("client", "cannot write data", errno);
+				return false;
+			}
 			return true;
 		}
 
+		// write data to client socket
 		bool Write(const std::vector<char> &data)
 		{
+			int error = write(_sock.desc, data.data(), data.size());
+			if (error < 0)
+			{
+				logger().err("client", "cannot write data", errno);
+				return false;
+			}
 			return true;
 		}
+
+		// write endl \r\n to socket
+		bool WriteEndl()
+		{
+			int error = write(_sock.desc, _delim.data(), _delim.size());
+			if (error < 0)
+			{
+				logger().err("client", "cannot write data", errno);
+				return false;
+			}
+			return true;
+		}
+
 	private:
 		// return static instance of command delimiter
 		static const std::string &Delim()
