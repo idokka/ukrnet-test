@@ -1,39 +1,29 @@
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <mutex>
 #include "stream-helper.hpp"
 
 namespace ukrnet
 {
+	// logger class
+	// can write log to console and specified file
 	class Logger
 	{
-	private:
-		// path to log file
-		std::string _log_path;
-		// log file stream
-		std::ofstream _log_file;
-		// write log to console
-		bool _write_to_console;
-		// write log to file
-		bool _write_to_file;
 	public:
-		/**
-		 * default constructor
-		 */
+		typedef std::lock_guard<std::mutex> mlock;
+	public:
+		// default constructor
 		Logger()
 			: _write_to_console(true)
 			, _write_to_file(true)
 		{
-
+			// none of init
 		}
-		/**
-		 * init logger:
-		 * open log file
-		 * @return true, is successful, or false otherwise
-		 */	
+
+		// init logger: try to open log file
+		// returns true, is successful, or false otherwise
 		bool init()
 		{
 			if (_log_path.empty())
@@ -79,6 +69,7 @@ namespace ukrnet
 		template <typename ... Values>
 		void log(std::string level, std::string src, Values ... values)
 		{
+			mlock lock(_m_do_log);
 			if (_log_file.is_open() && _write_to_file)
 				_log_file << date_time << tab << level << tab << "[" << src << "]" << tab;
 			if (_write_to_console)
@@ -104,12 +95,20 @@ namespace ukrnet
 			if (_write_to_console)
 				std::cout << value << std::endl;
 		}
+	private:
+		// path to log file
+		std::string _log_path;
+		// log file stream
+		std::ofstream _log_file;
+		// write log to console
+		bool _write_to_console;
+		// write log to file
+		bool _write_to_file;
+		// mutex for sync access to log file and console
+		std::mutex _m_do_log;
 	};
 
-	/**
-	 * logger static singletone instance
-	 * @return [static logger instance]
-	 */
+	// returns static logger instance
 	inline Logger &logger()
 	{
 		static Logger logger;

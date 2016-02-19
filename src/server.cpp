@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
 #include "include/server.hpp"
 #include "include/logger.hpp"
 #include "tclap/CmdLine.h"
@@ -11,18 +9,19 @@ using namespace TCLAP;
 
 // default server port
 const int default_port = 11222;
+// default log file
 const char *default_log_path = "server.log";
 
 int main(int argc, char const *argv[])
 {
-	// set default port
+	// set defaults
 	int port = default_port;
 	string log_path = default_log_path;
 
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("server", ' ', "0.1");
+		CmdLine cmd("server", ' ', "0.2");
 		ValueArg<int> port_arg("p", "port", "Port to listen by server", true, default_port, "int");
 		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, default_log_path, "string");
 		cmd.add(port_arg);
@@ -43,6 +42,15 @@ int main(int argc, char const *argv[])
 	logger().init();
 
 	// start server
-	server::Server server(port);
-	server.open();
+	Server server(port, [](Client &){});
+	server.Open();
+	if (server.is_opened() == false)
+	{
+		logger().err("main", "failed to open server");
+		return 1;
+	}
+
+	// start server listen
+	server.Accept();
+	return 0;
 }

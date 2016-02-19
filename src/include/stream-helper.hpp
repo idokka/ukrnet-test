@@ -1,16 +1,9 @@
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 #include <iomanip>
 
 namespace ukrnet
 {
-	/**
-	 * put current date and time in ostream
-	 * @param  stream [output stream]
-	 * @return        [output stream]
-	 */
+	// put current date and time in ostream
 	inline std::ostream& date_time(std::ostream& stream)
 	{
 		time_t tt = time(0);
@@ -27,11 +20,7 @@ namespace ukrnet
 		return stream;
 	}
 
-	/**
-	 * put tab in ostream
-	 * @param  stream [output stream]
-	 * @return        [output stream]
-	 */
+	// put tab in ostream
 	inline std::ostream& tab(std::ostream& stream)
 	{
 		return stream << '\t';
