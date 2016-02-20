@@ -21,6 +21,7 @@ namespace ukrnet
 		// sock: Sock structure for client socket
 		Client(Sock sock)
 			: _sock(sock)
+			, _is_opened(true)
 			, _delim(Delim())
 			, _pos_begin(_buffer.begin())
 			, _pos_end(_buffer.begin())
@@ -42,6 +43,9 @@ namespace ukrnet
 		std::string Read()
 		{
 			std::string result;
+			if (_is_opened == false)
+				return result;
+
 			// read while we can
 			while (true)
 			{
@@ -55,7 +59,13 @@ namespace ukrnet
 					// do read data from socket
 					readed = read(_sock.desc, read_begin, size_to_read);
 					// break reading if needed
-					if (readed <= 0)
+					if (readed < 0)
+					{
+						logger().err("client", "cannot read data", errno);
+						_is_opened = false;
+						break;
+					}
+					if (readed == 0)
 						break;
 					// reset iterators
 					_pos_begin = _buffer.begin();
@@ -98,6 +108,8 @@ namespace ukrnet
 		std::vector<char> Read(const int bytes_to_read)
 		{
 			std::vector<char> result;
+			if (_is_opened == false)
+				return result;
 			result.reserve(bytes_to_read);
 
 			// read while we can
@@ -111,7 +123,8 @@ namespace ukrnet
 					// break reading if needed
 					if (readed < 0)
 					{
-						logger().err("client", "cannot write data", errno);
+						logger().err("client", "cannot read data", errno);
+						_is_opened = false;
 						break;
 					}
 					if (readed == 0)
@@ -142,10 +155,13 @@ namespace ukrnet
 		// write string to client socket
 		bool Write(std::string str)
 		{	
+			if (_is_opened == false)
+				return false;
 			int error = write(_sock.desc, str.data(), str.size());
 			if (error < 0)
 			{
 				logger().err("client", "cannot write data", errno);
+				_is_opened = false;
 				return false;
 			}
 			return true;
@@ -154,10 +170,13 @@ namespace ukrnet
 		// write data to client socket
 		bool Write(const std::vector<char> &data)
 		{
+			if (_is_opened == false)
+				return false;
 			int error = write(_sock.desc, data.data(), data.size());
 			if (error < 0)
 			{
 				logger().err("client", "cannot write data", errno);
+				_is_opened = false;
 				return false;
 			}
 			return true;
@@ -166,10 +185,29 @@ namespace ukrnet
 		// write endl \r\n to socket
 		bool WriteEndl()
 		{
+			if (_is_opened == false)
+				return false;
 			int error = write(_sock.desc, _delim.data(), _delim.size());
 			if (error < 0)
 			{
 				logger().err("client", "cannot write data", errno);
+				_is_opened = false;
+				return false;
+			}
+			return true;
+		}
+
+		// check is client socket alive
+		bool CheckIsAlive()
+		{
+			if (_is_opened == false)
+				return false;
+			char buffer('\0');
+			int error = recv(_sock.desc, &buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
+			if (error < 0)
+			{
+				logger().err("client", "client socket closed", errno);
+				_is_opened = false;
 				return false;
 			}
 			return true;
@@ -182,7 +220,14 @@ namespace ukrnet
 			static std::string delim("\r\n");
 			return delim;
 		}
+
+	public:
+		// returns is client socket opened 
+		bool is_opened() const { return _is_opened; }
+
 	private:
+		// is socket opened
+		bool _is_opened;
 		// client socket struct
 		Sock _sock;
 		// read buffer
@@ -193,5 +238,6 @@ namespace ukrnet
 		aBuffer::iterator _pos_begin;
 		// end of valid data in buffer
 		aBuffer::iterator _pos_end;
+
 	};
 }

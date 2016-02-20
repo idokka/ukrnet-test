@@ -1,1 +1,1 @@
-: foreach *.cpp |> g++ %f -o %o -std=c++0x |> %B
+: foreach *.cpp |> g++ %f -o %o -Wl,--no-as-needed -pthread -std=c++0x -g -rdynamic |> %B

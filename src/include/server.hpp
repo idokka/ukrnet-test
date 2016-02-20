@@ -61,7 +61,7 @@ namespace ukrnet
 			_sock.addr.sin_port = htons(_port);
 
 			// try bind socket
-			int error = bind(_sock.desc, (const struct sockaddr *) &_sock.addr, sizeof(_sock.addr_len));
+			int error = bind(_sock.desc, (const struct sockaddr *) &_sock.addr, _sock.addr_len);
 			if (error < 0)
 			{
 				logger().err("server", "cannot bind socket", errno);
@@ -114,10 +114,12 @@ namespace ukrnet
 			while (true)
 			{
 				Sock client;
+				logger().nfo("server", "wait for connections");
 				client.desc = accept(_sock.desc, (struct sockaddr *) &client.addr, &client.addr_len);
+				logger().nfo("server", "new connection accepted");
 				// start new thread to work with client socket stream
 				auto do_client_execute = std::bind(& Server::DoClientExecute, this, std::placeholders::_1);
-				std::thread(do_client_execute, client);
+				std::thread(do_client_execute, client).detach();
 			}
 		}
 
