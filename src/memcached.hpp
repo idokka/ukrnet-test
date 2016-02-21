@@ -33,6 +33,7 @@ namespace ukrnet
 			// vector of char data
 			typedef std::vector<char> vecData;
 			// fields of data record
+			std::string key;
 			int hash;
 			vecData data;
 			int expire;
@@ -45,12 +46,15 @@ namespace ukrnet
 				, exp_at(0)
 			{}
 
-			// shrd ptr lesser by expire at
+			// shrd ptr lesser by expire at asc, and then by hash asc
 			static bool PtrLessByExpireAt(
 				const std::shared_ptr<DataRec> &lv, 
 				const std::shared_ptr<DataRec> &rv)
 			{
-				return lv.get()->exp_at < rv.get()->exp_at;
+				if (lv.get()->exp_at != rv.get()->exp_at)
+					return lv.get()->exp_at < rv.get()->exp_at;
+				else
+					lv.get()->hash < rv.get()->hash;
 			}
 		};
 
@@ -144,7 +148,7 @@ namespace ukrnet
 			if (data_len < 0)
 			{
 				data_len = expires;
-				expires = std::numeric_limits<int>::max();
+				expires = 0;
 			}
 			logger().nfo("main", "set command recieved", key);
 
@@ -153,21 +157,31 @@ namespace ukrnet
 				int hash = _str_hash(key);
 				auto it = _data.find(hash);
 				if (it != _data.end())
+				{
 					logger().wrn("main", "key exists, do overwrite with new data", key);
+					client.Write("EXISTS");
+					client.WriteEndl();
+				}
 				else
+				{
 					it = _data.emplace(hash, std::make_shared<DataRec>()).first;
+					client.Write("STORED");
+					client.WriteEndl();
+				}
 				auto rec_ptr = it->second;
 
 				// fill data record
+				rec_ptr->key = key;
 				rec_ptr->hash = hash;
 				rec_ptr->expire = expires;
-				rec_ptr->exp_at = expires + time(0);
+				rec_ptr->exp_at = (expires == 0) ? std::numeric_limits<int>::max() : (expires + time(0));
 				rec_ptr->data = client.Read(data_len);
 
 				// add to expire queue
 				auto hint = std::lower_bound(_expire_queue.begin(), _expire_queue.end(), 
 					rec_ptr, DataRec::PtrLessByExpireAt);
 				_expire_queue.insert(hint, rec_ptr);
+				// TODO: remove old record from expire queue if element was exists
 			}
 		}
 
@@ -177,6 +191,33 @@ namespace ukrnet
 			std::string key;
 			ss >> key;
 			logger().nfo("main", "get command recieved", key);
+			std::shared_ptr<DataRec> rec_ptr;
+
+			{ // check and add to map
+				mLock lock(_m_data);
+				int hash = _str_hash(key);
+				auto it = _data.find(hash);
+				if (it != _data.end())
+					rec_ptr = it->second;
+			}
+
+			// do answer to client
+			if (rec_ptr)
+			{
+				std::stringstream os;
+				// formatting output string and send it
+				os << "VALUE " << rec_ptr->key << " " << rec_ptr->data.size();
+				client.Write(os.str());
+				client.WriteEndl();
+				client.Write(rec_ptr->data);
+				client.WriteEndl();
+			}
+			else
+			{
+				logger().wrn("main", "key not exists", key);
+			}
+			client.Write("END");
+			client.WriteEndl();
 		}
 
 		// process delete command
@@ -185,6 +226,39 @@ namespace ukrnet
 			std::string key;
 			ss >> key;
 			logger().nfo("main", "del command recieved", key);
+			std::shared_ptr<DataRec> rec_ptr;
+
+			{ // check and add to map
+				mLock lock(_m_data);
+				int hash = _str_hash(key);
+				auto it = _data.find(hash);
+				if (it != _data.end())
+				{
+					rec_ptr = it->second;
+					_data.erase(it);
+					auto range = std::equal_range(_expire_queue.begin(), _expire_queue.end(), 
+						rec_ptr, DataRec::PtrLessByExpireAt);
+					auto exp_it = std::find(range.first, range.second, rec_ptr);
+					if (exp_it != range.second)
+					{
+						_expire_queue.erase(exp_it);
+					}
+				}
+			}
+
+			// do answer to client
+			if (rec_ptr)
+			{
+				client.Write("DELETED");
+				client.WriteEndl();
+				logger().nfo("main", "element deleted", key);
+			}
+			else
+			{
+				client.Write("NOT_FOUND");
+				client.WriteEndl();
+				logger().wrn("main", "key not exists", key);
+			}
 		}
 
 		// do process expire queue
@@ -214,7 +288,7 @@ namespace ukrnet
 				// log removed records
 				for (auto rec_ptr : queue_to_remove)
 				{
-					logger().nfo("main", "element removed while it expires", rec_ptr->hash);
+					logger().nfo("main", "element removed while it expires", rec_ptr->key);
 				}
 				queue_to_remove.clear();
 
