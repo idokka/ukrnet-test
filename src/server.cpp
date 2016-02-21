@@ -37,8 +37,12 @@ int main(int argc, char const *argv[])
 	logger().set_log_path(log_path);
 	logger().init();
 
+	// create server instance
 	MemCached memcached(port);
+	// register signals callback
 	signal(SIGUSR1, memcached.GetSigUsr1Handler().target<void(int)>());
+	signal(SIGUSR2, memcached.GetSigUsr2Handler().target<void(int)>());
+	// run server
 	memcached.Run();
 	return 0;
 }

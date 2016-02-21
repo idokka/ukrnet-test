@@ -12,6 +12,7 @@
 #include "include/server.hpp"
 #include "include/client.hpp"
 #include "include/logger.hpp"
+#include "include/stream-helper.hpp"
 
 namespace ukrnet
 {
@@ -104,6 +105,12 @@ namespace ukrnet
 			return std::bind(& MemCached::SignalUser1Handler, this, std::placeholders::_1);
 		}
 
+		// construct signal user handler function
+		std::function<void(int)> GetSigUsr2Handler()
+		{
+			return std::bind(& MemCached::SignalUser1Handler, this, std::placeholders::_1);
+		}
+
 	private:
 		// construct client func
 		Server::funcClient GetClientFunc()
@@ -129,13 +136,39 @@ namespace ukrnet
 			fs.close();
 		}
 
+		// SIGUSR2 handler: save data to file
+		void SignalUser2Handler(int signum)
+		{
+			std::ofstream fs("/tmp/memcached");
+
+			{ // lock data arrays
+				mLock lock(_m_data);
+				for (auto rec_ptr : _expire_queue)
+				{
+					fs 
+						<< rec_ptr->key << tab
+						<< rec_ptr->hash << tab
+						<< rec_ptr->expire << tab
+						<< rec_ptr->exp_at << tab
+						<< rec_ptr->data.size() << tab
+						<< rec_ptr->data.data() << std::endl;
+					// TODO: except case if data contains special characters
+				}
+			}
+
+			fs.flush();
+			fs.close();
+		}
+
 		// client func
 		void ClientFunc(Client &client)
 		{
 			Cmd cmd(Cmd::None);
 			std::string key;
 
-			while (client.CheckIsAlive())
+			//while (client.CheckIsAlive()) 
+			// TODO: wrong implement, os error 11 - resource temp unavailable
+			while (true)
 			{
 				std::stringstream ss(client.Read());
 				cmd = ParseCmd(ss);
@@ -175,6 +208,7 @@ namespace ukrnet
 				data_len = expires;
 				expires = 0;
 			}
+			auto data_value = client.Read(data_len);
 			logger().nfo("main", "set command recieved", key);
 
 			{ // check and add to map
@@ -200,7 +234,7 @@ namespace ukrnet
 				rec_ptr->hash = hash;
 				rec_ptr->expire = expires;
 				rec_ptr->exp_at = (expires == 0) ? std::numeric_limits<int>::max() : (expires + time(0));
-				rec_ptr->data = client.Read(data_len);
+				rec_ptr->data = data_value;
 
 				// add to expire queue
 				auto hint = std::lower_bound(_expire_queue.begin(), _expire_queue.end(), 
