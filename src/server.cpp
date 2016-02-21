@@ -7,23 +7,18 @@ using namespace std;
 using namespace ukrnet;
 using namespace TCLAP;
 
-// default server port
-const int default_port = 11222;
-// default log file
-const char *default_log_path = "server.log";
-
 int main(int argc, char const *argv[])
 {
 	// set defaults
-	int port = default_port;
-	string log_path = default_log_path;
+	int port = Server::DefaultPort;
+	string log_path = Logger::DefaultLogPath();
 
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("server", ' ', "0.2");
-		ValueArg<int> port_arg("p", "port", "Port to listen by server", true, default_port, "int");
-		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, default_log_path, "string");
+		CmdLine cmd("server", ' ', "0.4");
+		ValueArg<int> port_arg("p", "port", "Port to listen by server", true, port, "int");
+		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, log_path, "string");
 		cmd.add(port_arg);
 		cmd.add(log_path_arg);
 		cmd.parse(argc, argv);

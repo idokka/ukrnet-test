@@ -18,6 +18,11 @@ namespace ukrnet
 	public:
 		// custom client functor
 		typedef std::function<void(Client &)> funcClient;
+
+	public:
+		// default server port
+		static const int DefaultPort = 11222;
+
 	public:
 		// default constructor
 		Server()

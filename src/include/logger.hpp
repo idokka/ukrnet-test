@@ -12,7 +12,17 @@ namespace ukrnet
 	class Logger
 	{
 	public:
-		typedef std::lock_guard<std::mutex> mlock;
+		// lock guard for mutex
+		typedef std::lock_guard<std::mutex> mLock;
+		
+	public:
+		// returns static instance of default log path
+		static const std::string &DefaultLogPath()
+		{
+			static std::string default_log_path = "server.log";
+			return default_log_path;
+		}
+
 	public:
 		// default constructor
 		Logger()
@@ -69,7 +79,7 @@ namespace ukrnet
 		template <typename ... Values>
 		void log(std::string level, std::string src, Values ... values)
 		{
-			mlock lock(_m_do_log);
+			mLock lock(_m_do_log);
 			if (_log_file.is_open() && _write_to_file)
 				_log_file << date_time << tab << level << tab << "[" << src << "]" << tab;
 			if (_write_to_console)
@@ -95,6 +105,7 @@ namespace ukrnet
 			if (_write_to_console)
 				std::cout << value << std::endl;
 		}
+
 	private:
 		// path to log file
 		std::string _log_path;
@@ -106,6 +117,7 @@ namespace ukrnet
 		bool _write_to_file;
 		// mutex for sync access to log file and console
 		std::mutex _m_do_log;
+
 	};
 
 	// returns static logger instance
