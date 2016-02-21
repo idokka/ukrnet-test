@@ -108,7 +108,7 @@ namespace ukrnet
 		// construct signal user handler function
 		std::function<void(int)> GetSigUsr2Handler()
 		{
-			return std::bind(& MemCached::SignalUser1Handler, this, std::placeholders::_1);
+			return std::bind(& MemCached::SignalUser2Handler, this, std::placeholders::_1);
 		}
 
 	private:
@@ -121,13 +121,15 @@ namespace ukrnet
 		// SIGUSR1 handler: save data to file
 		void SignalUser1Handler(int signum)
 		{
+			logger().nfo("main", "SIGUSR1 catched");
 			std::ofstream fs("/tmp/memcached");
 
 			{ // lock data arrays
 				mLock lock(_m_data);
 				for (auto rec_ptr : _expire_queue)
 				{
-					fs << '\'' << rec_ptr->key << "\' -> \'" << rec_ptr->data.data() << std::endl;
+					std::string value(rec_ptr->data.begin(), rec_ptr->data.end());
+					fs << '\'' << rec_ptr->key << "\' -> \'" << value << '\'' << std::endl;
 					// TODO: except case if data contains special characters
 				}
 			}
@@ -139,19 +141,21 @@ namespace ukrnet
 		// SIGUSR2 handler: save data to file
 		void SignalUser2Handler(int signum)
 		{
+			logger().nfo("main", "SIGUSR2 catched");
 			std::ofstream fs("/tmp/memcached");
 
 			{ // lock data arrays
 				mLock lock(_m_data);
 				for (auto rec_ptr : _expire_queue)
 				{
+					std::string value(rec_ptr->data.begin(), rec_ptr->data.end());
 					fs 
 						<< rec_ptr->key << tab
 						<< rec_ptr->hash << tab
 						<< rec_ptr->expire << tab
 						<< rec_ptr->exp_at << tab
-						<< rec_ptr->data.size() << tab
-						<< rec_ptr->data.data() << std::endl;
+						<< value.size() << tab
+						<< value << std::endl;
 					// TODO: except case if data contains special characters
 				}
 			}
@@ -200,9 +204,9 @@ namespace ukrnet
 		void DoSet(Client &client, std::istream &ss)
 		{
 			// read command details
-			std::string key, value;
+			std::string key;
 			int expires(0), data_len(-1);
-			ss >> key >> value >> expires >> data_len;
+			ss >> key >> expires >> data_len;
 			if (data_len < 0)
 			{
 				data_len = expires;
@@ -223,6 +227,8 @@ namespace ukrnet
 				}
 				else
 				{
+					std::string value(data_value.begin(), data_value.end());
+					logger().nfo("main", "data stored", key, value);
 					it = _data.emplace(hash, std::make_shared<DataRec>()).first;
 					client.Write("STORED");
 					client.WriteEndl();

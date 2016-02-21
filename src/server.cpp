@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <signal.h>
 #include "include/logger.hpp"
 #include "memcached.hpp"
@@ -7,6 +8,39 @@
 using namespace std;
 using namespace ukrnet;
 using namespace TCLAP;
+
+struct SignalHandlers
+{
+	static std::function<void(int)> & on_sigusr1()
+	{
+		static std::function<void(int)> _on_sigusr1;
+		return _on_sigusr1;
+	}
+
+	static std::function<void(int)> & on_sigusr2()
+	{
+		static std::function<void(int)> _on_sigusr2;
+		return _on_sigusr2;
+	}
+
+	static void sigusr1(int signum)
+	{
+		if (on_sigusr1())
+			on_sigusr1()(signum);
+	}
+
+	static void sigusr2(int signum)
+	{
+		if (on_sigusr2())
+			on_sigusr2()(signum);
+	}
+
+	static void do_register()
+	{
+		signal(SIGUSR1, sigusr1);
+		signal(SIGUSR2, sigusr2);
+	}
+};
 
 int main(int argc, char const *argv[])
 {
@@ -40,8 +74,9 @@ int main(int argc, char const *argv[])
 	// create server instance
 	MemCached memcached(port);
 	// register signals callback
-	signal(SIGUSR1, memcached.GetSigUsr1Handler().target<void(int)>());
-	signal(SIGUSR2, memcached.GetSigUsr2Handler().target<void(int)>());
+	SignalHandlers::do_register();
+	SignalHandlers::on_sigusr1() = memcached.GetSigUsr1Handler();
+	SignalHandlers::on_sigusr2() = memcached.GetSigUsr2Handler();
 	// run server
 	memcached.Run();
 	return 0;
