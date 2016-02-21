@@ -5,6 +5,7 @@
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <functional>
 
@@ -97,11 +98,35 @@ namespace ukrnet
 			_server.Accept();
 		}
 
+		// construct signal user handler function
+		std::function<void(int)> GetSigUsr1Handler()
+		{
+			return std::bind(& MemCached::SignalUser1Handler, this, std::placeholders::_1);
+		}
+
 	private:
 		// construct client func
 		Server::funcClient GetClientFunc()
 		{
 			return std::bind(& MemCached::ClientFunc, this, std::placeholders::_1);
+		}
+
+		// SIGUSR1 handler: save data to file
+		void SignalUser1Handler(int signum)
+		{
+			std::ofstream fs("/tmp/memcached");
+
+			{ // lock data arrays
+				mLock lock(_m_data);
+				for (auto rec_ptr : _expire_queue)
+				{
+					fs << '\'' << rec_ptr->key << "\' -> \'" << rec_ptr->data.data() << std::endl;
+					// TODO: except case if data contains special characters
+				}
+			}
+
+			fs.flush();
+			fs.close();
 		}
 
 		// client func

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <signal.h>
 #include "include/logger.hpp"
 #include "memcached.hpp"
 #include "tclap/CmdLine.h"
@@ -37,6 +38,7 @@ int main(int argc, char const *argv[])
 	logger().init();
 
 	MemCached memcached(port);
+	signal(SIGUSR1, memcached.GetSigUsr1Handler().target<void(int)>());
 	memcached.Run();
 	return 0;
 }
