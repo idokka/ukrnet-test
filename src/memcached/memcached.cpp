@@ -1,4 +1,12 @@
 #include "memcached.hpp"
+#include "include/logger.hpp"
+#include "include/stream-helper.hpp"
+
+#include <limits>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
+#include <functional>
 
 using namespace ukrnet;
 
