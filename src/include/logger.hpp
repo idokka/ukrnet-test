@@ -1,8 +1,11 @@
 #pragma once
-#include <string>
-#include <iostream>
-#include <fstream>
 #include <mutex>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <cerrno>
+#include <cstring>
 #include "stream-helper.hpp"
 
 namespace ukrnet
@@ -125,5 +128,13 @@ namespace ukrnet
 	{
 		static Logger logger;
 		return logger;
+	}
+
+	// return string with errno and its explanation
+	inline const std::string curr_errno_msg()
+	{
+		std::stringstream ss;
+		ss << '[' << errno << "] " << strerror(errno);
+		return ss.str();
 	}
 }

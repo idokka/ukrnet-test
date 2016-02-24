@@ -2,7 +2,6 @@
 #include "logger.hpp"
 
 #include <algorithm>
-#include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -50,7 +49,7 @@ std::string Client::Read()
 			// break reading if needed
 			if (readed < 0)
 			{
-				logger().err("client", "cannot read data", errno);
+				logger().err("client", "cannot read data", curr_errno_msg());
 				_is_opened = false;
 				break;
 			}
@@ -112,7 +111,7 @@ std::vector<char> Client::Read(const int bytes_to_read)
 			// break reading if needed
 			if (readed < 0)
 			{
-				logger().err("client", "cannot read data", errno);
+				logger().err("client", "cannot read data", curr_errno_msg());
 				_is_opened = false;
 				break;
 			}
@@ -143,13 +142,13 @@ std::vector<char> Client::Read(const int bytes_to_read)
 
 // write string to client socket
 bool Client::Write(std::string str)
-{	
+{
 	if (_is_opened == false)
 		return false;
 	int error = write(_sock.desc, str.data(), str.size());
 	if (error < 0)
 	{
-		logger().err("client", "cannot write data", errno);
+		logger().err("client", "cannot write data", curr_errno_msg());
 		_is_opened = false;
 		return false;
 	}
@@ -164,7 +163,7 @@ bool Client::Write(const std::vector<char> &data)
 	int error = write(_sock.desc, data.data(), data.size());
 	if (error < 0)
 	{
-		logger().err("client", "cannot write data", errno);
+		logger().err("client", "cannot write data", curr_errno_msg());
 		_is_opened = false;
 		return false;
 	}
@@ -179,7 +178,7 @@ bool Client::WriteEndl()
 	int error = write(_sock.desc, _delim.data(), _delim.size());
 	if (error < 0)
 	{
-		logger().err("client", "cannot write data", errno);
+		logger().err("client", "cannot write data", curr_errno_msg());
 		_is_opened = false;
 		return false;
 	}
@@ -195,7 +194,7 @@ bool Client::CheckIsAlive()
 	int error = recv(_sock.desc, &buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
 	if (error < 0)
 	{
-		logger().err("client", "client socket closed", errno);
+		logger().err("client", "client socket closed", curr_errno_msg());
 		_is_opened = false;
 		return false;
 	}
