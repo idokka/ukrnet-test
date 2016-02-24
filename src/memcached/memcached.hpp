@@ -37,6 +37,8 @@ namespace ukrnet
 
 			// default constructor, fills zeros
 			DataRec();
+			// returns size of record data
+			size_t size() const;
 			// shrd ptr lesser by expire at asc, and then by hash asc
 			static bool PtrLessByExpireAt(
 				const std::shared_ptr<DataRec> &lv, 
@@ -88,6 +90,8 @@ namespace ukrnet
 
 		// do process expire queue
 		void ProcessExpireQueue();
+		// update data inf mmap file
+		void UpdateMapFile(vecData &data);
 
 	private:
 		// server socket port
@@ -102,6 +106,11 @@ namespace ukrnet
 		std::mutex _m_data;
 		// string hasher
 		strHash _str_hash;
+		// mutex for sync access to data file
+		std::mutex _m_data_file;
+
+	private:
+		static const std::string _data_file_path;
 
 	};
 }

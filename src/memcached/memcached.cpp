@@ -8,8 +8,14 @@
 #include <fstream>
 #include <algorithm>
 #include <functional>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 using namespace ukrnet;
+
+const std::string MemCached::_data_file_path("./data.bin");
 
 // default constructor, fills zeros
 MemCached::DataRec::DataRec()
@@ -17,6 +23,12 @@ MemCached::DataRec::DataRec()
 	, expire(0)
 	, exp_at(0)
 {}
+
+// returns size of record data: size of key, key data, size of data, data
+size_t MemCached::DataRec::size() const
+{
+	return sizeof(size_t) * 2 + key.size() + data.size();
+}
 
 // shrd ptr lesser by expire at asc, and then by hash asc
 bool MemCached::DataRec::PtrLessByExpireAt(
@@ -170,6 +182,7 @@ void MemCached::DoSet(Client &client, std::istream &ss)
 	}
 	auto data_value = client.Read(data_len);
 	logger().nfo("main", "set command recieved", key);
+	vecData queue_to_file;
 
 	{ // check and add to map
 		mLock lock(_m_data);
@@ -177,12 +190,22 @@ void MemCached::DoSet(Client &client, std::istream &ss)
 		auto it = _data.find(hash);
 		if (it != _data.end())
 		{
+			// record exists - overwrite data
 			logger().wrn("main", "key exists, do overwrite with new data", key);
 			client.Write("EXISTS");
 			client.WriteEndl();
+			// do remove old record from expire queue
+			auto range = std::equal_range(_expire_queue.begin(), _expire_queue.end(), 
+				it->second, DataRec::PtrLessByExpireAt);
+			auto exp_it = std::find(range.first, range.second, it->second);
+			if (exp_it != range.second)
+			{
+				_expire_queue.erase(exp_it);
+			}
 		}
 		else
 		{
+			// new record
 			std::string value(data_value.begin(), data_value.end());
 			logger().nfo("main", "data stored", key, value);
 			it = _data.emplace(hash, std::make_shared<DataRec>()).first;
@@ -202,8 +225,12 @@ void MemCached::DoSet(Client &client, std::istream &ss)
 		auto hint = std::lower_bound(_expire_queue.begin(), _expire_queue.end(), 
 			rec_ptr, DataRec::PtrLessByExpireAt);
 		_expire_queue.insert(hint, rec_ptr);
-		// TODO: remove old record from expire queue if element was exists
+
+		queue_to_file.assign(_expire_queue.begin(), _expire_queue.end());
 	}
+
+	// write data queue to file
+	UpdateMapFile(queue_to_file);
 }
 
 // process get command
@@ -248,6 +275,7 @@ void MemCached::DoDel(Client &client, std::istream &ss)
 	ss >> key;
 	logger().nfo("main", "del command recieved", key);
 	std::shared_ptr<DataRec> rec_ptr;
+	vecData queue_to_file;
 
 	{ // check and add to map
 		mLock lock(_m_data);
@@ -263,6 +291,7 @@ void MemCached::DoDel(Client &client, std::istream &ss)
 			if (exp_it != range.second)
 			{
 				_expire_queue.erase(exp_it);
+				queue_to_file.assign(_expire_queue.begin(), _expire_queue.end());
 			}
 		}
 	}
@@ -280,6 +309,10 @@ void MemCached::DoDel(Client &client, std::istream &ss)
 		client.WriteEndl();
 		logger().wrn("main", "key not exists", key);
 	}
+
+	// write data queue to file, only if data has been changed
+	if (rec_ptr)
+		UpdateMapFile(queue_to_file);
 }
 
 // do process expire queue
@@ -289,6 +322,7 @@ void MemCached::ProcessExpireQueue()
 	{
 		int now = (int)time(0);
 		vecData queue_to_remove;
+		vecData queue_to_file;
 
 		{ // lock and process expire queue
 			mLock lock(_m_data);
@@ -304,6 +338,7 @@ void MemCached::ProcessExpireQueue()
 				else
 					break;
 			}
+			queue_to_file.assign(_expire_queue.begin(), _expire_queue.end());
 		}
 
 		// log removed records
@@ -311,9 +346,92 @@ void MemCached::ProcessExpireQueue()
 		{
 			logger().nfo("main", "element removed while it expires", rec_ptr->key);
 		}
-		queue_to_remove.clear();
+
+		// write data queue to file, only if some records have been removed
+		if (queue_to_remove.empty() == false)
+			UpdateMapFile(queue_to_file);
 
 		// wait next iteration
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
+}
+
+void MemCached::UpdateMapFile(vecData &data)
+{
+	// lock and process data
+	mLock lock(_m_data_file);
+
+	// try to open data file
+	int fd = open(_data_file_path.data(), O_RDWR | O_CREAT | O_TRUNC, (mode_t)0600);
+	if (fd < 0)
+	{
+		logger().err("main", "cannot open data file", _data_file_path, curr_errno_msg());
+		return;
+	}
+
+	// calc sum of data records
+	size_t data_sum_len(0);
+	for (auto rec_ptr : data)
+		data_sum_len += rec_ptr->size();
+
+	// try to seek data file
+	int error = lseek(fd, data_sum_len - 1, SEEK_SET);
+	if (error < 0)
+	{
+		logger().err("main", "cannot seek data file", data_sum_len, curr_errno_msg());
+		close(fd);
+		return;
+	}
+
+	// try to write end of data file
+	error = write(fd, "", 1);
+	if (error < 0)
+	{
+		logger().err("main", "cannot write end of data file", curr_errno_msg());
+		close(fd);
+		return;
+	}
+
+	// try to map data file in memory
+	char *mfd = (char *)mmap(0, data_sum_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (mfd == MAP_FAILED)
+	{
+		logger().err("main", "cannot map data file", curr_errno_msg());
+		close(fd);
+		return;
+	}
+
+	*mfd = '*';
+	// write data
+	char *offset(mfd);
+	size_t data_len(0);
+	for (auto rec_ptr : data)
+	{
+		data_len = rec_ptr->key.size();
+		offset = std::copy_n(& data_len, sizeof(data_len), offset);
+		offset = std::copy(rec_ptr->key.begin(), rec_ptr->key.end(), offset);
+		data_len = rec_ptr->data.size();
+		offset = std::copy_n(& data_len, sizeof(data_len), offset);
+		offset = std::copy(rec_ptr->data.begin(), rec_ptr->data.end(), offset);
+	}
+
+	// try to sync data to file
+	error = msync(mfd, data_sum_len, MS_SYNC);
+	if (error < 0)
+	{
+		logger().err("main", "cannot sync data file", curr_errno_msg());
+		close(fd);
+		return;
+	}
+
+	// try to unmap data file
+	error = munmap(mfd, data_sum_len);
+	if (error < 0)
+	{
+		logger().err("main", "cannot unmap data file", curr_errno_msg());
+		close(fd);
+		return;
+	}
+
+	close(fd);
 }
