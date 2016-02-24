@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include "client.hpp"
 #include "sock.hpp"
 
 namespace ukrnet

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "include/logger.hpp"
+#include "../include/logger.hpp"
 #include "memcached.hpp"
 #include "tclap/CmdLine.h"
 

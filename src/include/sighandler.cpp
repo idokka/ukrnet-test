@@ -23,5 +23,5 @@ void SigHandler::SetEvent(int signum, onSignal value, onSignal &event)
 	if (event)
 		signal(signum, OnSignal);
 	else
-		signal(signum, SIGDEF);
+		signal(signum, SIG_DFL);
 }

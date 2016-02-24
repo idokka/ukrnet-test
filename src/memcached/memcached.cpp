@@ -1,7 +1,8 @@
 #include "memcached.hpp"
-#include "include/logger.hpp"
-#include "include/stream-helper.hpp"
+#include "../include/logger.hpp"
+#include "../include/stream-helper.hpp"
 
+#include <thread>
 #include <limits>
 #include <sstream>
 #include <fstream>
@@ -9,7 +10,6 @@
 #include <functional>
 
 using namespace ukrnet;
-
 
 // default constructor, fills zeros
 MemCached::DataRec::DataRec()
@@ -19,7 +19,7 @@ MemCached::DataRec::DataRec()
 {}
 
 // shrd ptr lesser by expire at asc, and then by hash asc
-static bool MemCached::DataRec::PtrLessByExpireAt(
+bool MemCached::DataRec::PtrLessByExpireAt(
 	const std::shared_ptr<DataRec> &lv, 
 	const std::shared_ptr<DataRec> &rv)
 {

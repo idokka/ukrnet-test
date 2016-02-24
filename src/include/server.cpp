@@ -1,6 +1,5 @@
 #include "server.hpp"
 #include "logger.hpp"
-#include "client.hpp"
 
 #include <thread>
 #include <cerrno>

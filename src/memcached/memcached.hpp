@@ -4,9 +4,9 @@
 #include <mutex>
 #include <memory>
 
-#include "include/server.hpp"
-#include "include/client.hpp"
-#include "include/sighandler.hpp"
+#include "../include/server.hpp"
+#include "../include/client.hpp"
+#include "../include/sighandler.hpp"
 
 namespace ukrnet
 {

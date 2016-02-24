@@ -9,14 +9,13 @@
 
 using namespace ukrnet;
 
-static const std::string Client::_delim("\r\n"));
+const std::string Client::_delim("\r\n");
 
 // default constructor
 // sock: Sock structure for client socket
 Client::Client(Sock sock)
 	: _sock(sock)
 	, _is_opened(true)
-	, _delim(Delim())
 	, _pos_begin(_buffer.begin())
 	, _pos_end(_buffer.begin())
 {
