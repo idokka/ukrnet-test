@@ -2,7 +2,6 @@
 #include "logger.hpp"
 
 #include <thread>
-#include <cerrno>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -41,7 +40,7 @@ bool Server::Open()
 	_sock.desc = socket(AF_INET, SOCK_STREAM, 0);
 	if (_sock.desc < 0)
 	{
-		logger().err("server", "cannot open descriptor", errno);
+		logger().err("server", "cannot open descriptor", curr_errno_msg());
 		return false;
 	}
 
@@ -54,7 +53,7 @@ bool Server::Open()
 	int error = bind(_sock.desc, (const struct sockaddr *) &_sock.addr, _sock.addr_len);
 	if (error < 0)
 	{
-		logger().err("server", "cannot bind socket", errno);
+		logger().err("server", "cannot bind socket", curr_errno_msg());
 		return false;
 	}
 
@@ -62,7 +61,7 @@ bool Server::Open()
 	error = listen(_sock.desc, 5);
 	if (error < 0)
 	{
-		logger().err("server", "cannot listen socket", errno);
+		logger().err("server", "cannot listen socket", curr_errno_msg());
 		return false;
 	}
 
@@ -84,7 +83,7 @@ bool Server::Close()
 	int error = close(_sock.desc);
 	if (error < 0)
 	{
-		logger().err("server", "cannot close socket", errno);
+		logger().err("server", "cannot close socket", curr_errno_msg());
 		return false;
 	}
 
