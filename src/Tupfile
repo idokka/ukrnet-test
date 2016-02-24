@@ -1,1 +1,4 @@
-: foreach *.cpp |> g++ %f -o %o -Wl,--no-as-needed -pthread -std=c++0x -g -rdynamic |> %B
+include_rules
+: foreach include/*.cpp |> !cc |> {bin}
+: foreach memcached/*.cpp |> !cc |> {bin}
+: {bin} |> !bin |> bin/server

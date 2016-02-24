@@ -1,0 +1,4 @@
+!cc = |> g++ -c %f -o %o -std=c++0x |> bin/%B.o
+!ar = |> ar crs %o %f |>
+!bin = |> g++ %f -o %o -Wl,--no-as-needed -pthread -g -rdynamic |>
+!mv = |> pwd && mv %B.o ../bin/%B.o |>

@@ -29,3 +29,9 @@
 
 # tup repository
 .tup
+
+# log files
+*.log
+
+# bin folder
+bin/
