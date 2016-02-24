@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 	try 
 	{
 		CmdLine cmd("server", ' ', "0.4");
-		ValueArg<int> port_arg("p", "port", "Port to listen by server", true, port, "int");
+		ValueArg<int> port_arg("p", "port", "Port to listen by server", false, port, "int");
 		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, log_path, "string");
 		cmd.add(port_arg);
 		cmd.add(log_path_arg);
