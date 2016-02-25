@@ -2,7 +2,9 @@
 #include "client.hpp"
 #include "server.hpp"
 #include "sock.hpp"
+#include "logger.hpp"
 #include <thread>
+#include <unistd.h>
 
 using namespace ukrnet;
 
@@ -25,4 +27,16 @@ void FactoryThread::DoExec(Sock sock, funcClientExecute exec)
 // do create new client and execute it
 void FactoryFork::Create(Sock sock, funcClientExecute exec)
 {
+	pid_t child_process = fork();
+	if (child_process == (pid_t)-1) 
+	{
+		logger().err("client", "unable to fork for client connection", curr_errno_msg());
+		exit(1);
+	}
+	else if (child_process == 0)
+	{
+		logger().nfo("client", "forked for client connection");
+		Client client(sock);
+		exec(client);
+	}
 }
