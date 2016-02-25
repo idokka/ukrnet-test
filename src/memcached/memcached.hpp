@@ -6,6 +6,7 @@
 
 #include "../include/server.hpp"
 #include "../include/client.hpp"
+#include "../include/factory.hpp"
 #include "../include/sighandler.hpp"
 
 namespace ukrnet
@@ -59,7 +60,9 @@ namespace ukrnet
 	public:
 		// default constructor
 		// port: server socket port
-		MemCached(int port);
+		// use_thread: use thread connection execution model
+		// use_fork: use fork connection execution model
+		MemCached(int port, bool use_thread, bool use_fork);
 		// do run server
 		void Run();
 
@@ -70,7 +73,7 @@ namespace ukrnet
 
 	private:
 		// construct client func
-		Server::funcClient GetClientFunc();
+		IFactory::funcClientExecute GetClientFunc();
 		// SIGUSR1 handler: save data to file
 		void SignalUser1Handler(int signum);
 		// SIGUSR2 handler: save data to file
@@ -108,8 +111,16 @@ namespace ukrnet
 		strHash _str_hash;
 		// mutex for sync access to data file
 		std::mutex _m_data_file;
+		// connection execute factory
+		std::shared_ptr<IFactory> _factory;
 
 	private:
+		// parse use conn exec model flags
+		// thread model is default
+		static std::shared_ptr<IFactory> ParseConnExecModel(bool use_thread, bool use_fork);
+
+	private:
+		// path to data file
 		static const std::string _data_file_path;
 
 	};

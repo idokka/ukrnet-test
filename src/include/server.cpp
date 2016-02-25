@@ -1,6 +1,8 @@
 #include "server.hpp"
 #include "logger.hpp"
+#include "factory.hpp"
 
+#include <memory>
 #include <thread>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -12,6 +14,7 @@ using namespace ukrnet;
 Server::Server()
 	: _port(0)
 	, _is_opened(false)
+	, _client_factory(nullptr)
 {
 	// none of init
 }
@@ -106,15 +109,7 @@ bool Server::Accept()
 		logger().nfo("server", "wait for connections");
 		client.desc = accept(_sock.desc, (struct sockaddr *) &client.addr, &client.addr_len);
 		logger().nfo("server", "new connection accepted");
-		// start new thread to work with client socket stream
-		auto do_client_execute = std::bind(& Server::DoClientExecute, this, std::placeholders::_1);
-		std::thread(do_client_execute, client).detach();
+		// call factory to work with client socket stream
+		_client_factory->Create(client, _client_execute_func);
 	}
-}
-
-// main client function
-void Server::DoClientExecute(Sock sock)
-{
-	Client client(sock);
-	_client_func(client);
 }

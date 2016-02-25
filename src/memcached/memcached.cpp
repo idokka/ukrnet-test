@@ -1,7 +1,9 @@
 #include "memcached.hpp"
 #include "../include/logger.hpp"
 #include "../include/stream-helper.hpp"
+#include "../include/factory.hpp"
 
+#include <memory>
 #include <thread>
 #include <limits>
 #include <sstream>
@@ -43,10 +45,12 @@ bool MemCached::DataRec::PtrLessByExpireAt(
 
 // default constructor
 // port: server socket port
-MemCached::MemCached(int port)
+// use_thread: use thread connection execution model
+// use_fork: use fork connection execution model
+MemCached::MemCached(int port, bool use_thread, bool use_fork)
 	: _port(port)
 {
-	// none of init
+	_factory = ParseConnExecModel(use_thread, use_fork);
 }
 
 // do run server
@@ -54,7 +58,8 @@ void MemCached::Run()
 {
 	// start server
 	_server.set_port(_port);
-	_server.set_client_func(GetClientFunc());
+	_server.set_client_factory(_factory);
+	_server.set_client_execute_func(GetClientFunc());
 	_server.Open();
 	if (_server.is_opened() == false)
 	{
@@ -80,8 +85,18 @@ SigHandler::onSignal MemCached::GetSigUsr2Handler()
 	return std::bind(& MemCached::SignalUser2Handler, this, std::placeholders::_1);
 }
 
+// parse use conn exec model flags
+// thread model is default
+std::shared_ptr<IFactory> MemCached::ParseConnExecModel(bool use_thread, bool use_fork)
+{
+	if (use_thread || (!use_thread && !use_fork))
+		return std::make_shared<FactoryThread>();
+	else
+		return std::make_shared<FactoryFork>();
+}
+
 // construct client func
-Server::funcClient MemCached::GetClientFunc()
+IFactory::funcClientExecute MemCached::GetClientFunc()
 {
 	return std::bind(& MemCached::ClientFunc, this, std::placeholders::_1);
 }

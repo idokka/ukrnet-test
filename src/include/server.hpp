@@ -1,7 +1,9 @@
 #pragma once
+#include <memory>
 #include <functional>
-#include "client.hpp"
 #include "sock.hpp"
+#include "client.hpp"
+#include "factory.hpp"
 
 namespace ukrnet
 {
@@ -9,15 +11,13 @@ namespace ukrnet
 	class Server
 	{
 	public:
-		// custom client functor
-		typedef std::function<void(Client &)> funcClient;
-
-	public:
 		// default server port
 		static const int DefaultPort = 11222;
 
 	public:
 		// default constructor
+		// port: server socket port
+		// client_factory: factory of client execution model
 		Server();
 		// default destructor; closes socket if needed
 		~Server();
@@ -31,10 +31,6 @@ namespace ukrnet
 		// main accept loop; creates thread on every incloming connection, call client functor
 		bool Accept();
 
-	private:
-		// main client function
-		void DoClientExecute(Sock sock);
-
 	public:
 		// get socket port
 		int port() const { return _port; }
@@ -45,9 +41,13 @@ namespace ukrnet
 		// set is server opened, returns operation result
 		bool set_is_opened(bool value) { return value ? Open() : Close(); }
 		// get client socket function
-		const funcClient &client_func() const { return _client_func; }
+		const IFactory::funcClientExecute &client_execute_func() const { return _client_execute_func; }
 		// set client socket function
-		void set_client_func(funcClient value) { _client_func = value; }
+		void set_client_execute_func(IFactory::funcClientExecute value) { _client_execute_func = value; }
+		// get factory for client execution model
+		std::shared_ptr<IFactory> client_factory() const { return _client_factory; }
+		// set factory for client execution model
+		void set_client_factory(std::shared_ptr<IFactory> value) { _client_factory = value; }
 
 	private:
 		// listen port
@@ -57,7 +57,9 @@ namespace ukrnet
 		// is socket opened
 		bool _is_opened;
 		// client execution function
-		funcClient _client_func;
+		IFactory::funcClientExecute _client_execute_func;
+		// factory of client execution
+		std::shared_ptr<IFactory> _client_factory;
 
 	};
 }
