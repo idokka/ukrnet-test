@@ -18,15 +18,11 @@ int main(int argc, char const *argv[])
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("server", ' ', "0.4");
-		ValueArg<int> port_arg("p", "port", "Port to listen by server", false, port, "int");
-		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, log_path, "string");
-		SwitchArg use_thread_arg("t","use-thread", "Use thread for connection execute", false);
-		SwitchArg use_fork_arg("f","use-fork", "Use fork for connections execute", false);
-		cmd.add(port_arg);
-		cmd.add(log_path_arg);
-		cmd.add(use_thread_arg);
-		cmd.add(use_fork_arg);
+		CmdLine cmd("custom memcached server", ' ', "0.5");
+		ValueArg<int> port_arg("p", "port", "Port to listen by server", false, port, "int", cmd);
+		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, log_path, "string", cmd);
+		SwitchArg use_thread_arg("t","use-thread", "Use thread for connection execute", cmd, false);
+		SwitchArg use_fork_arg("f","use-fork", "Use fork for connections execute", cmd, false);
 		cmd.parse(argc, argv);
 		// extract parsed values
 		port = port_arg.getValue();
