@@ -19,14 +19,6 @@ namespace ukrnet
 		typedef std::lock_guard<std::mutex> mLock;
 		
 	public:
-		// returns static instance of default log path
-		static const std::string &DefaultLogPath()
-		{
-			static std::string default_log_path = "server.log";
-			return default_log_path;
-		}
-
-	public:
 		// default constructor
 		Logger()
 			: _write_to_console(true)

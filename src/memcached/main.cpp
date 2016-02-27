@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 {
 	// set defaults
 	int port = Server::DefaultPort;
-	string log_path = Logger::DefaultLogPath();
+	string log_path = "server.log";
 	bool use_thread(false);
 	bool use_fork(false);
 
