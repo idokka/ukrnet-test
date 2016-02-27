@@ -9,8 +9,21 @@ namespace ukrnet
 	class WordsParser
 	{
 	public:
-		// set of words hashes 
-		typedef std::set<int> setData;
+		// data record
+		struct Record
+		{
+			// word hash
+			int hash;
+			// word
+			std::string word;
+			// default constructor
+			Record(std::string word);
+			// lesser for compare
+			bool operator < (const Record &rv) const;
+		};
+
+		// set of word data 
+		typedef std::set<Record> setData;
 		// word hasher
 		typedef std::hash<std::string> strHasher;
 

@@ -5,8 +5,29 @@
 #include <locale>
 #include <fstream>
 #include <iostream>
+#include <functional>
 
 using namespace ukrnet;
+
+// default constructor
+WordsParser::Record::Record(std::string word)
+	: hash(0)
+	, word(word)
+{
+	static strHasher hasher;
+	hash = hasher(word);
+}
+
+// lesser for compare
+bool WordsParser::Record::operator < (const WordsParser::Record &rv) const
+{
+	if (this->hash != rv.hash)
+		return this->hash < rv.hash;
+	else 
+		return std::lexicographical_compare(
+			this->word.begin(), this->word.end(),
+			rv.word.begin(), rv.word.end());
+}
 
 // generate binary data file from text data file
 bool WordsParser::ProcessInput(std::string data_file_path)
@@ -27,7 +48,7 @@ bool WordsParser::ProcessInput(std::string data_file_path)
 	{
 		std::getline(in_stream, word);
 		if (word.empty() == false)
-			data.insert(hash(word));
+			data.insert(Record(word));
 	}
 	while (in_stream.eof() == false);
 	in_stream.close();
@@ -39,7 +60,7 @@ bool WordsParser::ProcessInput(std::string data_file_path)
 	do
 	{
 		std::getline(std::cin, word);
-		if ((word.empty() == false) && (data.find(hash(word)) != data.end()))
+		if ((word.empty() == false) && (data.find(Record(word)) != data.end()))
 			std::cout << word << std::endl;
 		else
 			break;
