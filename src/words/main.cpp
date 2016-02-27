@@ -10,7 +10,7 @@ using namespace TCLAP;
 int main(int argc, char const *argv[])
 {
 	// set defaults
-	string data_file = "data.txt";
+	string data_file = "words.txt";
 	string log_path = "words.log";
 
 	// try parse command line arguments
