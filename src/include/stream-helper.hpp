@@ -29,4 +29,40 @@ namespace ukrnet
 		return stream << '\t';
 	}
 
+	template <typename valueT>
+	struct bin_wrap
+	{
+		valueT value;
+
+		typedef bin_wrap<valueT> mytype;
+
+		bin_wrap()
+		{}
+
+		bin_wrap(valueT value)
+			: value(value)
+		{}
+
+		bin_wrap(const valueT &rv)
+			: value(rv.value)
+		{}
+
+		operator valueT() const { return value; }
+		mytype & operator = (const mytype &rv) { value = rv.value; return *this; }
+		valueT operator () () const { return value; }
+
+		template <class charT, class traits = std::char_traits<charT> >
+		friend std::basic_ostream<charT, traits> & operator << (
+			std::basic_ostream<charT, traits> &stream, const mytype &value)
+		{
+			return stream.write((char *)&value.value, sizeof(valueT));
+		}
+
+		template <class charT, class traits = std::char_traits<charT> >
+		friend std::basic_istream<charT, traits> & operator >> (
+			std::basic_istream<charT, traits> &stream, const mytype &value)
+		{
+			return stream.read((char *)&value.value, sizeof(valueT));
+		}
+	};
 }
