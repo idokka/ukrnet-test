@@ -1,3 +1,5 @@
+#include <string>
+#include <ostream>
 #include <iostream>
 #include "../include/logger.hpp"
 #include "tclap/CmdLine.h"
@@ -36,5 +38,87 @@ int main(int argc, char const *argv[])
 
 	// do work
 	Pages pages(data_file);
+	string cmd;
+	int item(0);
+	int page(0);
+	int count(10);
+	while (true)
+	{
+		cout 
+			<< "0(c) set items count on page" << endl
+			<< "1(gi) get item page" << endl
+			<< "2(gp) get page" << endl
+			<< "3(a) add item" << endl
+			<< "4(d) delete item" << endl
+			<< "5(e) check item exists" << endl
+			<< "6(s) get stat" << endl
+			<< "7(t) generate test data" << endl
+			<< "8(q) quit" << endl
+			<< "> ";
+		cin >> cmd;
+		if ((cmd == "c") || (cmd == "0"))
+		{
+			cin >> count;
+			cout << ": page size setted to " << count << endl;
+		}
+		else if ((cmd == "gi") || (cmd == "1"))
+		{
+			cin >> item;
+			int page = pages.GetItemPage(item, count);
+			cout 
+				<< ": item " << item 
+				<< " placed on page " << page << endl;
+		}
+		else if ((cmd == "gp") || (cmd == "2"))
+		{
+			cin >> page;
+			auto data = pages.GetPage(page, count);
+			cout << ": page " << page << " items: ";
+			for (int item : data)
+				cout << item << " ";
+			cout << endl;
+		}
+		else if ((cmd == "a") || (cmd == "3"))
+		{
+			cin >> item;
+			bool result = pages.AddItem(item);
+			cout 
+				<< ": item " << item 
+				<< (result ? " has been added" : " already exists") << endl;
+		}
+		else if ((cmd == "d") || (cmd == "4"))
+		{
+			cin >> item;
+			bool result = pages.EraseItem(item);
+			cout 
+				<< ": item " << item 
+				<< (result ? " has bees deleted" : " not exists") << endl;
+		}
+		else if ((cmd == "e") || (cmd == "5"))
+		{
+			cin >> item;
+			bool result = pages.ItemExists(item);
+			cout 
+				<< ": item " << item 
+				<< (result ? " exists" : " not exists") << endl;
+		}
+		else if ((cmd == "s") || (cmd == "6"))
+		{
+			cout 
+				<< ": items count: " << pages.GetItemCount() 
+				<< ", pages count: " << pages.GetPageCount(count)
+				<< ", page size: " << count << endl;
+		}
+		else if ((cmd == "t") || (cmd == "7"))
+		{
+			pages.GenerateTestFile();
+			cout << ": test file has been generated" << endl;
+		}
+		else if ((cmd == "q") || (cmd == "8"))
+		{
+			cout << ": goodbye" << endl;
+			break;
+		}
+	}
 	return 0;
 }
