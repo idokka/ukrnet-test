@@ -1,4 +1,8 @@
 include_rules
-: foreach include/*.cpp |> !cc |> {bin}
-: foreach memcached/*.cpp |> !cc |> {bin}
-: {bin} |> !bin |> bin/server
+: foreach include/*.cpp |> !cc |> bin/mc_%B.o {mc}
+: foreach memcached/*.cpp |> !cc |> bin/mc_%B.o {mc}
+: {mc} |> !ld |> bin/server
+: foreach words/*.cpp |> !cc |> bin/w_%B.o {w}
+: {w} |> !ld |> bin/words
+: foreach pages/*.cpp |> !cc |> bin/p_%B.o {p}
+: {p} |> !ld |> bin/pages
