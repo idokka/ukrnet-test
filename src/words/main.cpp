@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("words", ' ', "0.1");
+		CmdLine cmd("words", ' ', "0.2");
 		ValueArg<string> data_file_arg("s", "src", "Data file path", false, data_file, "string", cmd);
 		ValueArg<string> log_path_arg("l", "log", "Log file path", false, log_path, "string", cmd);
 		cmd.parse(argc, argv);
