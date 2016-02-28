@@ -17,7 +17,7 @@ Pages::Pages(std::string data_file_path)
 	, _data_file(0)
 {
 	// try to open data file
-	int _data_file = open(_data_file_path.data(), O_RDONLY, (mode_t)0600);
+	_data_file = open(_data_file_path.data(), O_RDWR | O_CREAT, (mode_t)0600);
 	if (_data_file < 0)
 		logger().err("pages", "cannot open data file", _data_file_path, curr_errno_msg());
 }
@@ -31,10 +31,16 @@ Pages::~Pages()
 // generate test file
 void Pages::GenerateTestFile()
 {
-	int value= 150;
+	int value(150);
+	size_t new_length = (value / 7) * sizeof(int);
 
 	// extend file at one item
-	ftruncate(_data_file, (value / 7) * sizeof(int));
+	int error = ftruncate(_data_file, new_length);
+	if (error < 0)
+	{
+		logger().err("pages", "cannot truncate file", curr_errno_msg());
+		return;
+	}
 
 	Map map = OpenMap();
 	int *current = map.ptr;
@@ -64,10 +70,13 @@ bool Pages::ItemExists(int item)
 std::vector<int> Pages::GetPage(size_t page_idx, size_t page_size)
 {
 	// map current page
-	Map map = OpenMap(page_idx, page_size);
+	Map map = OpenMap();
+	int *page_begin = map.ptr + page_idx * page_size;
+	int *page_end = std::min(page_begin + page_size, map.ptr_end);
 	std::vector<int> page_data;
 	// copy page data
-	page_data.assign(map.ptr, map.ptr_end);
+	if (page_begin < page_end)
+		page_data.assign(page_begin, page_end);
 	// close map and exit
 	CloseMap(map);
 	return page_data;
@@ -81,7 +90,7 @@ size_t Pages::GetItemPage(int item, size_t page_size)
 	// find and remember item
 	int *item_ptr = FindItem(map, item);
 	size_t result = (item_ptr != nullptr)
-		? std::distance(map.ptr, item_ptr) / page_size + 1
+		? std::distance(map.ptr, item_ptr) / page_size
 		: -1;
 	// close map and exit
 	CloseMap(map);
@@ -110,6 +119,7 @@ bool Pages::AddItem(int item)
 	// setup hint into item
 	*item_hint = item;
 	CloseMap(map);
+	return true;
 }
 
 // erase specified item
@@ -178,28 +188,6 @@ auto Pages::OpenMap() -> Map
 	return Map(ptr, size);
 }
 
-// open mmap for specified page
-auto Pages::OpenMap(size_t page_idx, size_t page_size) -> Map
-{
-	// calc offset and size to map file
-	size_t count = GetItemCount();
-	size_t offset = page_idx * page_size;
-	size_t end_offset = std::min(count, (page_idx + 1) * page_size);
-	size_t size = end_offset - offset;
-	// exit if size is zero
-	if (size == 0)
-		return Map();
-	// try to map data file in memory
-	int *ptr = (int *)mmap(0, size * sizeof(int), 
-		PROT_READ | PROT_WRITE, MAP_SHARED, _data_file, offset * sizeof(int));
-	if (ptr == MAP_FAILED)
-	{
-		logger().err("pages", "cannot map data file", curr_errno_msg());
-		return Map();
-	}
-	return Map(ptr, size);
-}
-
 // find item pointer
 int *Pages::FindItem(Map map, int item)
 {
@@ -221,9 +209,19 @@ int *Pages::FindInsertHint(Map map, int item)
 void Pages::CloseMap(Map map)
 {
 	if (map.ptr == nullptr)
+	{
+		logger().err("pages", "data file not mapped");
 		return;
+	}
+	// try to sync data to file
+	int error = msync(map.ptr, map.size * sizeof(int), MS_SYNC);
+	if (error < 0)
+	{
+		logger().err("pages", "cannot sync data file", curr_errno_msg());
+		return;
+	}
 	// try to unmap data file
-	int error = munmap(map.ptr, map.size * sizeof(int));
+	error = munmap(map.ptr, map.size * sizeof(int));
 	if (error < 0)
 		logger().err("pages", "cannot unmap data file", curr_errno_msg());
 }

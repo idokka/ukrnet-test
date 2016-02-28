@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("pages", ' ', "0.1");
+		CmdLine cmd("pages", ' ', "0.3");
 		ValueArg<string> data_file_arg("d", "data", "Data file path", false, data_file, "string", cmd);
 		ValueArg<string> log_path_arg("l", "log", "Log file path", false, log_path, "string", cmd);
 		cmd.parse(argc, argv);
@@ -45,15 +45,15 @@ int main(int argc, char const *argv[])
 	while (true)
 	{
 		cout 
-			<< "0(c) set items count on page" << endl
-			<< "1(gi) get item page" << endl
-			<< "2(gp) get page" << endl
-			<< "3(a) add item" << endl
-			<< "4(d) delete item" << endl
-			<< "5(e) check item exists" << endl
-			<< "6(s) get stat" << endl
-			<< "7(t) generate test data" << endl
-			<< "8(q) quit" << endl
+			<< "  0(c) set items count on page" << endl
+			<< "  1(gi) get item page" << endl
+			<< "  2(gp) get page" << endl
+			<< "  3(a) add item" << endl
+			<< "  4(d) delete item" << endl
+			<< "  5(e) check item exists" << endl
+			<< "  6(s) get stat" << endl
+			<< "  7(t) generate test data" << endl
+			<< "  8(q) quit" << endl
 			<< "> ";
 		cin >> cmd;
 		if ((cmd == "c") || (cmd == "0"))
@@ -119,6 +119,7 @@ int main(int argc, char const *argv[])
 			cout << ": goodbye" << endl;
 			break;
 		}
+		cout << endl;
 	}
 	return 0;
 }

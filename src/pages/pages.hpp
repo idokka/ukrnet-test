@@ -27,8 +27,8 @@ namespace ukrnet
 			// default constructor
 			Map(int *ptr, size_t size)
 				: ptr(ptr)
-				, size(size)
 				, ptr_end(ptr + size)
+				, size(size)
 			{}
 		};
 
@@ -59,8 +59,6 @@ namespace ukrnet
 	private:
 		// open mmap for all file
 		Map OpenMap();
-		// open mmap for specified page
-		Map OpenMap(size_t page_idx, size_t page_size);
 		// close mmap
 		void CloseMap(Map map);
 		// find item pointer
