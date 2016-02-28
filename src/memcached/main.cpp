@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
 	// try parse command line arguments
 	try 
 	{
-		CmdLine cmd("custom memcached server", ' ', "0.5");
+		CmdLine cmd("custom memcached server", ' ', "0.6");
 		ValueArg<int> port_arg("p", "port", "Port to listen by server", false, port, "int", cmd);
 		ValueArg<string> log_path_arg("l", "log", "Path to log file", false, log_path, "string", cmd);
 		SwitchArg use_thread_arg("t","use-thread", "Use thread for connection execute", cmd, false);

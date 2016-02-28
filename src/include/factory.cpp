@@ -4,9 +4,20 @@
 #include "sock.hpp"
 #include "logger.hpp"
 #include <thread>
+#include <memory>
 #include <unistd.h>
 
 using namespace ukrnet;
+
+// parse use conn exec model flags
+// thread model is default
+std::shared_ptr<IFactory> IFactory::ParseConnExecModel(bool use_thread, bool use_fork)
+{
+	if (use_thread || (!use_thread && !use_fork))
+		return std::make_shared<FactoryThread>();
+	else
+		return std::make_shared<FactoryFork>();
+}
 
 // do create new client and execute it
 void FactoryThread::Create(Sock sock, funcClientExecute exec)

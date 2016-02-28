@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <functional>
 #include "sock.hpp"
 
@@ -17,6 +18,11 @@ namespace ukrnet
 	public:
 		// do create new client and execute it
 		virtual void Create(Sock sock, funcClientExecute exec) = 0;
+
+	public:
+		// parse use conn exec model flags
+		// thread model is default
+		static std::shared_ptr<IFactory> ParseConnExecModel(bool use_thread, bool use_fork);
 
 	};
 

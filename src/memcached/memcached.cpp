@@ -50,7 +50,7 @@ bool MemCached::DataRec::PtrLessByExpireAt(
 MemCached::MemCached(int port, bool use_thread, bool use_fork)
 	: _port(port)
 {
-	_factory = ParseConnExecModel(use_thread, use_fork);
+	_factory = IFactory::ParseConnExecModel(use_thread, use_fork);
 }
 
 // do run server
@@ -83,16 +83,6 @@ SigHandler::onSignal MemCached::GetSigUsr1Handler()
 SigHandler::onSignal MemCached::GetSigUsr2Handler()
 {
 	return std::bind(& MemCached::SignalUser2Handler, this, std::placeholders::_1);
-}
-
-// parse use conn exec model flags
-// thread model is default
-std::shared_ptr<IFactory> MemCached::ParseConnExecModel(bool use_thread, bool use_fork)
-{
-	if (use_thread || (!use_thread && !use_fork))
-		return std::make_shared<FactoryThread>();
-	else
-		return std::make_shared<FactoryFork>();
 }
 
 // construct client func

@@ -115,11 +115,6 @@ namespace ukrnet
 		std::shared_ptr<IFactory> _factory;
 
 	private:
-		// parse use conn exec model flags
-		// thread model is default
-		static std::shared_ptr<IFactory> ParseConnExecModel(bool use_thread, bool use_fork);
-
-	private:
 		// path to data file
 		static const std::string _data_file_path;
 
