@@ -30,20 +30,20 @@ namespace ukrnet
 	}
 
 	template <typename valueT>
-	struct bin_wrap
+	struct BinWrap
 	{
 		valueT value;
 
-		typedef bin_wrap<valueT> mytype;
+		typedef BinWrap<valueT> mytype;
 
-		bin_wrap()
+		BinWrap()
 		{}
 
-		bin_wrap(valueT value)
+		BinWrap(valueT value)
 			: value(value)
 		{}
 
-		bin_wrap(const valueT &rv)
+		BinWrap(const valueT &rv)
 			: value(rv.value)
 		{}
 
@@ -65,4 +65,12 @@ namespace ukrnet
 			return stream.read((char *)&value.value, sizeof(valueT));
 		}
 	};
+
+	// put elem in stream as binary
+	template <typename valueT>
+	BinWrap<valueT> bin_wrap(valueT value)
+	{
+		return BinWrap<valueT>(value);
+	}
+
 }
