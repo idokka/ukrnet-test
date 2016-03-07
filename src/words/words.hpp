@@ -16,10 +16,16 @@ namespace ukrnet
 			int hash;
 			// word
 			std::string word;
+			// empty constructor
+			Record();
 			// default constructor
 			Record(std::string word);
 			// lesser for compare
 			bool operator < (const Record &rv) const;
+			// read from stream operator
+			friend std::istream & operator >> (std::istream &stream, Record &record);
+			// write to stream operator
+			friend std::ostream & operator << (std::ostream &stream, const Record &record);
 		};
 
 		// set of word data 
@@ -30,6 +36,12 @@ namespace ukrnet
 	public:
 		// process input words
 		bool ProcessInput(std::string data_file_path);
+
+	private:
+		// create index file for specified data file
+		bool CreateIndexFile(std::string data_file_path);
+		// load index file
+		bool LoadIndexFile(std::string data_file_path, setData &data);
 
 	};
 }
