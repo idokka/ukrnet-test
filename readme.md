@@ -20,7 +20,7 @@ This is test project for ukrnet. Based on [specifications](specs.pdf).
 # init tup
 tup $ cd thirdparty/tup
 tup $ ./bootstrap.sh
-tup $ sudo ln ~/ukrnet-test/thirdparty/tup/tup ~/tup
+tup $ sudo ln ~/ukrnet-test/thirdparty/tup/tup /usr/bin/tup
 # init tclap
 tclap $ cd ../tclap
 tclap $ ./configure
