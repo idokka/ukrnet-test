@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"hash",
+				"hasher"
+			],
+			[
+				"da",
+				"data_file_path"
+			],
+			[
+				"cre",
+				"CreateIndexFile"
+			],
+			[
+				"lo",
+				"LoadIndexFile"
+			],
+			[
+				"bin",
+				"bin_data"
+			],
+			[
 				"page",
 				"page_data"
 			],
@@ -98,10 +118,6 @@
 			[
 				"SIG",
 				"SIGUSR1"
-			],
-			[
-				"da",
-				"data"
 			],
 			[
 				"Le",
@@ -219,30 +235,6 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "readme.md",
-			"settings":
-			{
-				"buffer_size": 3299,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/memcached/memcached.cpp",
-			"settings":
-			{
-				"buffer_size": 10566,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/memcached/main.cpp",
-			"settings":
-			{
-				"buffer_size": 1524,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "Packages/cppStartingKit/C++ - Starting Kit.sublime-build",
 	"build_system_choices":
@@ -322,26 +314,31 @@
 	"expanded_folders":
 	[
 		"/home/dokka/src/ukrnet-test/src",
-		"/home/dokka/src/ukrnet-test/src/memcached"
+		"/home/dokka/src/ukrnet-test/src/include",
+		"/home/dokka/src/ukrnet-test/src/memcached",
+		"/home/dokka/src/ukrnet-test/src/words"
 	],
 	"file_history":
 	[
+		"/home/dokka/src/ukrnet-test/src/include/client.cpp",
+		"/home/dokka/src/ukrnet-test/src/memcached/memcached.hpp",
+		"/home/dokka/src/ukrnet-test/src/memcached/memcached.cpp",
+		"/home/dokka/src/ukrnet-test/src/words/words.hpp",
+		"/home/dokka/src/ukrnet-test/src/words/words.cpp",
+		"/home/dokka/src/ukrnet-test/src/words.txt",
+		"/home/dokka/src/ukrnet-test/src/in.txt",
+		"/home/dokka/src/ukrnet-test/readme.md",
 		"/home/dokka/src/ukrnet-test/src/Tuprules.tup",
 		"/home/dokka/src/ukrnet-test/src/Tupfile",
 		"/home/dokka/src/ukrnet-test/src/memcached/main.cpp",
 		"/home/dokka/src/ukrnet-test/src/include/factory.cpp",
 		"/home/dokka/src/ukrnet-test/src/include/factory.hpp",
-		"/home/dokka/src/ukrnet-test/src/memcached/memcached.hpp",
-		"/home/dokka/src/ukrnet-test/src/memcached/memcached.cpp",
 		"/home/dokka/src/ukrnet-test/src/words/main.cpp",
 		"/home/dokka/src/ukrnet-test/src/pages/pages.hpp",
 		"/home/dokka/src/ukrnet-test/src/pages/pages.cpp",
 		"/home/dokka/src/ukrnet-test/src/pages/main.cpp",
 		"/home/dokka/src/ukrnet-test/src/include/stream-helper.hpp",
-		"/home/dokka/src/ukrnet-test/src/words/words.cpp",
-		"/home/dokka/src/ukrnet-test/src/words/words.hpp",
 		"/home/dokka/src/ukrnet-test/src/src.txt",
-		"/home/dokka/src/ukrnet-test/src/in.txt",
 		"/home/dokka/src/ukrnet-test/src/words.log",
 		"/home/dokka/src/ukrnet-test/src/bin/in.txt",
 		"/home/dokka/src/ukrnet-test/src/include/logger.hpp",
@@ -365,7 +362,6 @@
 		"/home/dokka/src/ukrnet-test/thirdparty/tclap/examples/test2.cpp",
 		"/home/dokka/src/ukrnet-test/thirdparty/tclap/examples/test1.cpp",
 		"/home/dokka/src/ukrnet-test/src/mapwrite.c",
-		"/home/dokka/src/ukrnet-test/src/include/client.cpp",
 		"/home/dokka/src/ukrnet-test/src/memcached/Tupfile",
 		"/home/dokka/src/ukrnet-test/src/include/Tupfile",
 		"/home/dokka/src/ukrnet-test/src/bin/Tupfile",
@@ -496,103 +492,8 @@
 	"groups":
 	[
 		{
-			"selected": 0,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "readme.md",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3299,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3074,
-								3074
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "markdown",
-							"buffer_scroll_name": "2fe3e205",
-							"syntax": "Packages/MarkdownEditing/Markdown.tmLanguage"
-						},
-						"translation.x": -0.0,
-						"translation.y": 2112.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "src/memcached/memcached.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10566,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6838,
-								6838
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "1b5ce837",
-							"spell_check": false,
-							"syntax": "Packages/cppStartingKit/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 3513.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "src/memcached/main.cpp",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 1524,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								296,
-								296
-							]
-						],
-						"settings":
-						{
-							"bs_sintax": "c++",
-							"buffer_scroll_name": "1ce53b2c",
-							"spell_check": false,
-							"syntax": "Packages/cppStartingKit/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 540.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -629,7 +530,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 112.0
+		"height": 156.0
 	},
 	"output.find_results":
 	{
