@@ -25,6 +25,57 @@ Server::~Server()
 	Close();
 }
 
+// get socket port
+int Server::port() const
+{
+	return _port;
+}
+
+// set socket port, returns operation result
+bool Server::set_port(int value)
+{
+	if (_is_opened)
+		return false;
+	else 
+		return (_port = value);
+}
+
+// get is server opened
+bool Server::is_opened() const
+{
+	return _is_opened;
+}
+
+// set is server opened, returns operation result
+bool Server::set_is_opened(bool value)
+{
+	return value ? Open() : Close();
+}
+
+// get client socket function
+const IFactory::funcClientExecute & Server::client_execute_func() const
+{
+	return _client_execute_func;
+}
+
+// set client socket function
+void Server::set_client_execute_func(IFactory::funcClientExecute value)
+{
+	_client_execute_func = value;
+}
+
+// get factory for client execution model
+std::shared_ptr<IFactory> Server::client_factory() const
+{
+	return _client_factory;
+}
+
+// set factory for client execution model
+void Server::set_client_factory(std::shared_ptr<IFactory> value)
+{
+	_client_factory = value;
+}
+
 // open socket
 // returns true, if socket has successfuly opened, otherwise false
 bool Server::Open()

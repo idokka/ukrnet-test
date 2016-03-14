@@ -33,21 +33,21 @@ namespace ukrnet
 
 	public:
 		// get socket port
-		int port() const { return _port; }
+		int port() const;
 		// set socket port, returns operation result
-		bool set_port(int value) { if (_is_opened) return false; else return (_port = value); }
+		bool set_port(int value);
 		// get is server opened
-		bool is_opened() const { return _is_opened; }
+		bool is_opened() const;
 		// set is server opened, returns operation result
-		bool set_is_opened(bool value) { return value ? Open() : Close(); }
+		bool set_is_opened(bool value);
 		// get client socket function
-		const IFactory::funcClientExecute &client_execute_func() const { return _client_execute_func; }
+		const IFactory::funcClientExecute &client_execute_func() const;
 		// set client socket function
-		void set_client_execute_func(IFactory::funcClientExecute value) { _client_execute_func = value; }
+		void set_client_execute_func(IFactory::funcClientExecute value);
 		// get factory for client execution model
-		std::shared_ptr<IFactory> client_factory() const { return _client_factory; }
+		std::shared_ptr<IFactory> client_factory() const;
 		// set factory for client execution model
-		void set_client_factory(std::shared_ptr<IFactory> value) { _client_factory = value; }
+		void set_client_factory(std::shared_ptr<IFactory> value);
 
 	private:
 		// listen port

@@ -13,14 +13,14 @@ namespace ukrnet
 
 	public:
 		// get current SIGUSR1 handler
-		static onSignal on_sigusr1() { return _on_sigusr1; }
+		static onSignal on_sigusr1();
 		// set SIGUSR1 handler
-		static void set_on_sigusr1(onSignal value) { SetEvent(SIGUSR1, value, _on_sigusr1); }
+		static void set_on_sigusr1(onSignal value);
 
 		// get current SIGUSR2 handler
-		static onSignal on_sigusr2() { return _on_sigusr2; }
+		static onSignal on_sigusr2();
 		// set SIGUSR2 handler
-		static void set_on_sigusr2(onSignal value) { SetEvent(SIGUSR2, value, _on_sigusr2); }
+		static void set_on_sigusr2(onSignal value);
 
 	private:
 		// static global signals handler
