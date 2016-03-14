@@ -26,6 +26,15 @@ MemCached::DataRec::DataRec()
 	, exp_at(0)
 {}
 
+// key constructor
+MemCached::DataRec::DataRec(std::string key)
+	: hash(0)
+	, key(key)
+{
+	static strHash hasher;
+	hash = hasher(key);
+}
+
 // returns size of record data: size of key, key data, size of data, data
 size_t MemCached::DataRec::size() const
 {
@@ -41,6 +50,19 @@ bool MemCached::DataRec::PtrLessByExpireAt(
 		return lv.get()->exp_at < rv.get()->exp_at;
 	else
 		lv.get()->hash < rv.get()->hash;
+}
+
+// shrd ptr lesser by key hash asc, and then by key data asc
+bool MemCached::DataRec::PtrLessByHash::operator()(
+	const std::shared_ptr<DataRec> &lv, 
+	const std::shared_ptr<DataRec> &rv)
+{
+	if (lv.get()->hash != rv.get()->hash)
+		return lv.get()->hash < rv.get()->hash;
+	else
+		return std::lexicographical_compare(
+			lv.get()->key.begin(), lv.get()->key.end(),
+			rv.get()->key.begin(), rv.get()->key.end());
 }
 
 // default constructor
@@ -141,13 +163,15 @@ void MemCached::SignalUser2Handler(int signum)
 void MemCached::ClientFunc(Client &client)
 {
 	Cmd cmd(Cmd::None);
-	std::string key;
 
 	//while (client.CheckIsAlive()) 
 	// TODO: wrong implement, os error 11 - resource temp unavailable
 	while (true)
 	{
-		std::stringstream ss(client.Read());
+		std::string value = client.Read();
+		if (value.empty() && (client.is_opened() == false))
+			break;
+		std::stringstream ss(value);
 		cmd = ParseCmd(ss);
 		if (cmd == Cmd::Set)
 			DoSet(client, ss);
@@ -155,6 +179,8 @@ void MemCached::ClientFunc(Client &client)
 			DoGet(client, ss);
 		else if (cmd == Cmd::Del)
 			DoDel(client, ss);
+		else
+			logger().wrn("main", "unknown command recieved", value);
 	}
 }
 
@@ -188,11 +214,11 @@ void MemCached::DoSet(Client &client, std::istream &ss)
 	auto data_value = client.Read(data_len);
 	logger().nfo("main", "set command recieved", key);
 	vecData queue_to_file;
+	auto set_key = std::make_shared<DataRec>(key);
 
 	{ // check and add to map
 		mLock lock(_m_data);
-		int hash = _str_hash(key);
-		auto it = _data.find(hash);
+		auto it = _data.find(set_key);
 		if (it != _data.end())
 		{
 			// record exists - overwrite data
@@ -213,15 +239,14 @@ void MemCached::DoSet(Client &client, std::istream &ss)
 			// new record
 			std::string value(data_value.begin(), data_value.end());
 			logger().nfo("main", "data stored", key, value);
-			it = _data.emplace(hash, std::make_shared<DataRec>()).first;
+			auto rec_ptr = std::make_shared<DataRec>(key);
+			it = _data.emplace(rec_ptr, rec_ptr).first;
 			client.Write("STORED");
 			client.WriteEndl();
 		}
 		auto rec_ptr = it->second;
 
 		// fill data record
-		rec_ptr->key = key;
-		rec_ptr->hash = hash;
 		rec_ptr->expire = expires;
 		rec_ptr->exp_at = (expires == 0) ? std::numeric_limits<int>::max() : (expires + time(0));
 		rec_ptr->data = data_value;
@@ -245,11 +270,11 @@ void MemCached::DoGet(Client &client, std::istream &ss)
 	ss >> key;
 	logger().nfo("main", "get command recieved", key);
 	std::shared_ptr<DataRec> rec_ptr;
+	auto get_key = std::make_shared<DataRec>(key);
 
-	{ // check and add to map
+	{ // check and get from map
 		mLock lock(_m_data);
-		int hash = _str_hash(key);
-		auto it = _data.find(hash);
+		auto it = _data.find(get_key);
 		if (it != _data.end())
 			rec_ptr = it->second;
 	}
@@ -280,12 +305,12 @@ void MemCached::DoDel(Client &client, std::istream &ss)
 	ss >> key;
 	logger().nfo("main", "del command recieved", key);
 	std::shared_ptr<DataRec> rec_ptr;
+	auto del_key = std::make_shared<DataRec>(key);
 	vecData queue_to_file;
 
-	{ // check and add to map
+	{ // check and del from map
 		mLock lock(_m_data);
-		int hash = _str_hash(key);
-		auto it = _data.find(hash);
+		auto it = _data.find(del_key);
 		if (it != _data.end())
 		{
 			rec_ptr = it->second;
@@ -337,7 +362,7 @@ void MemCached::ProcessExpireQueue()
 				if (rec_ptr->exp_at <= now)
 				{
 					_expire_queue.erase(_expire_queue.begin());
-					_data.erase(rec_ptr->hash);
+					_data.erase(rec_ptr);
 					queue_to_remove.push_back(rec_ptr);
 				}
 				else

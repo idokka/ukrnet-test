@@ -29,27 +29,45 @@ namespace ukrnet
 		{
 			// vector of char data
 			typedef std::vector<char> vecData;
-			// fields of data record
-			std::string key;
+			// key hash
 			int hash;
+			// key data
+			std::string key;
+			// stored value
 			vecData data;
+			// expire in value, secs
 			int expire;
+			// expire at value, secs
 			int exp_at;
 
 			// default constructor, fills zeros
 			DataRec();
+			// key constructor
+			DataRec(std::string key);
 			// returns size of record data
 			size_t size() const;
+
 			// shrd ptr lesser by expire at asc, and then by hash asc
 			static bool PtrLessByExpireAt(
 				const std::shared_ptr<DataRec> &lv, 
 				const std::shared_ptr<DataRec> &rv);
+
+			// shrd ptr lesser by key hash asc, and then by key data asc
+			struct PtrLessByHash
+			{
+				bool operator()(
+					const std::shared_ptr<DataRec> &lv, 
+					const std::shared_ptr<DataRec> &rv);
+			};
 		};
 
 		// string hash function
 		typedef std::hash<std::string> strHash;
-		// map data <int hash> = <data record>
-		typedef std::map<int, std::shared_ptr<DataRec> > mapData;
+		// map data <data record as key> = <data record as value>
+		typedef std::map<
+			std::shared_ptr<DataRec>, 
+			std::shared_ptr<DataRec>,
+			DataRec::PtrLessByHash> mapData;
 		// deque of data records
 		typedef std::deque<std::shared_ptr<DataRec>> deqData;
 		// vector of data records
@@ -107,8 +125,6 @@ namespace ukrnet
 		deqData _expire_queue;
 		// mutex for sync access to data map
 		std::mutex _m_data;
-		// string hasher
-		strHash _str_hash;
 		// mutex for sync access to data file
 		std::mutex _m_data_file;
 		// connection execute factory
