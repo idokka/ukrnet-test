@@ -54,7 +54,11 @@ std::string Client::Read()
 				break;
 			}
 			if (readed == 0)
+			{
+				logger().wrn("client", "socket closed");
+				_is_opened = false;
 				break;
+			}
 			// reset iterators
 			_pos_begin = _buffer.begin();
 			_pos_end = _pos_begin + readed;
@@ -116,7 +120,11 @@ std::vector<char> Client::Read(const int bytes_to_read)
 				break;
 			}
 			if (readed == 0)
+			{
+				logger().wrn("client", "socket closed");
+				_is_opened = false;
 				break;
+			}
 			// reset iterators
 			_pos_begin = _buffer.begin();
 			_pos_end = _pos_begin + readed;
@@ -192,7 +200,7 @@ bool Client::CheckIsAlive()
 		return false;
 	char buffer('\0');
 	int error = recv(_sock.desc, &buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
-	if (error < 0)
+	if (error == 0)
 	{
 		logger().err("client", "client socket closed", curr_errno_msg());
 		_is_opened = false;
